@@ -1,0 +1,85 @@
+﻿@model List<YouTubeApiProject.Models.YouTubeVideoModel>
+
+<h2 class="text-center">What's New on YouTube?</h2>
+
+<!-- Search Form -->
+<form method="post" asp-action="Search" class="text-center">
+    <input type="text" name="query" placeholder="Search for Videos" class="form-control mx-auto" style="max-width: 400px; margin-bottom: 10px;" required />
+
+    <select name="duration" class="form-control mx-auto" style="max-width: 400px; margin-bottom: 10px;">
+        <option value="">Durations:-</option>
+        <option value="short">Less than 4 min</option>
+        <option value="medium">4 - 20 min</option>
+        <option value="long">More than 20 min</option>
+    </select>
+
+    <button type="submit" class="btn btn-danger">Search</button>
+</form>
+
+<!-- Display Error Messages -->
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger text-center">
+        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+        {
+            <p>@error.ErrorMessage</p>
+        }
+    </div>
+}
+
+<!-- Display No Videos Found Message -->
+@if (ViewBag.Message != null)
+{
+    <div class="alert alert-warning text-center">
+        <p>@ViewBag.Message</p>
+    </div>
+}
+
+<!-- Pagination Controls - Moved Above Results -->
+@if (Model != null && Model.Any())
+{
+    <div class="text-center my-4">
+        <form method="post" asp-action="Search" class="d-inline">
+            <input type="hidden" name="query" value="@ViewBag.Query" />
+            <input type="hidden" name="duration" value="@ViewBag.Duration" />
+            @if (!string.IsNullOrEmpty(ViewBag.PrevPageToken))
+            {
+                <input type="hidden" name="pageToken" value="@ViewBag.PrevPageToken" />
+                <button type="submit" class="btn btn-dark mx-2">&larr; Previous</button>
+            }
+        </form>
+
+        <span class="mx-3">Page Navigation</span>
+
+        <form method="post" asp-action="Search" class="d-inline">
+            <input type="hidden" name="query" value="@ViewBag.Query" />
+            <input type="hidden" name="duration" value="@ViewBag.Duration" />
+            @if (!string.IsNullOrEmpty(ViewBag.NextPageToken))
+            {
+                <input type="hidden" name="pageToken" value="@ViewBag.NextPageToken" />
+                <button type="submit" class="btn btn-dark mx-2">Next &rarr;</button>
+            }
+        </form>
+    </div>
+
+    <!-- Display Search Results -->
+    <div class="container mt-4">
+        <div class="row">
+            @foreach (var video in Model)
+            {
+                <div class="col-md-4 mb-4">
+                    <div class="card">
+                        <img src="@video.ThumbnailUrl" class="card-img-top" alt="@video.Title">
+                        <div class="card-body">
+                            <h5 class="card-title">@video.Title</h5>
+                            <p class="card-text">@video.Description</p>
+                            <p class="text-muted"><strong>Duration:</strong> @video.Duration</p>
+                            <a href="@video.VideoUrl" target="_blank" class="btn btn-primary w-100">Watch</a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+}
+
